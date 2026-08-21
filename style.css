@@ -205,13 +205,13 @@ body {
 .controls {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
 }
 
 .control-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 4px;
 }
 
 .control-group label {
@@ -271,10 +271,11 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px 12px;
-    padding: 12px 14px;
+    padding: 10px 12px;
     background: var(--bg-input);
     border-radius: var(--radius-sm);
     transition: background var(--ease);
+    margin-top: 0;
 }
 
 .template-fields .full-width {
@@ -313,7 +314,7 @@ body {
     flex-wrap: wrap;
     align-items: center;
     gap: 16px;
-    padding: 8px 0;
+    padding: 4px 0;
 }
 
 .color-dot-wrap {
