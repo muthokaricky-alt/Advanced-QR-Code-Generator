@@ -27,3 +27,18 @@
 1. **Clone the repo:**
    ```bash
    git clone https://github.com/muthokaricky-alt/Advanced-QR-Code-Generator.git
+
+**Future**
+PLanning to make improvements and backend later
+
+
+
+
+
+
+
+
+
+
+
+   
