@@ -1,55 +1,29 @@
-# ⚡ Advanced QR Code Generator
+# ⚡ Advanced QR Studio Pro
 
-A powerful, browser-based QR code generator with advanced features like custom colors, logo overlay, and bulk CSV generation. No server or internet connection required after the first load.
+**The ultimate QR code generator** – fully offline, with dark mode, templates, bulk generation, scanner, analytics, and more.
 
-![QR Code Generator Demo](https://via.placeholder.com/800x400.png?text=QR+Code+Generator+Preview)
+![QR Studio Pro Demo](https://via.placeholder.com/800x400.png?text=QR+Studio+Pro)
 
 ## ✨ Features
 
-- **Instant Generation** – Works entirely in your browser
-- **Custom Colors** – Choose any foreground and background color
-- **Logo Overlay** – Upload your logo (PNG/JPG) with high error correction
-- **Adjustable Size** – Slide to resize from 200px to 600px
-- **Bulk Generation** – Upload a CSV file and download a ZIP of all QR codes
-- **Export Options**:
-  - **PNG** – High-resolution with logo & colors (great for printing)
-  - **SVG** – Vector format for designers (scalable to any size)
+| Feature | Description |
+|---------|-------------|
+| **🎨 Custom Colors** | Pick any foreground and background color |
+| **🖼️ Logo Overlay** | Upload a logo (PNG) with high error correction |
+| **📋 4 Templates** | Plain Text, WiFi, Contact (vCard), Event (Calendar) |
+| **🔲 Corner Styles** | Square, Rounded, Circle, Diamond |
+| **📐 Adjustable Size** | 200px – 600px |
+| **📷 QR Scanner** | Scan QR codes with your device camera |
+| **📊 Analytics** | Track total scans, unique codes, daily activity |
+| **📜 Scan History** | Saves last 50 QR codes locally |
+| **📦 Bulk Generation** | Upload CSV → download ZIP of all QR codes |
+| **⬇ Export Options** | PNG (with logo), SVG (vector), PDF (A4 print-ready) |
+| **📋 Copy to Clipboard** | Copy QR as image to paste anywhere |
+| **🌙 Dark Mode** | Toggle between light and dark themes |
+| **💾 100% Offline** | No server, no tracking, works locally |
 
-## 🚀 How to Use
+## 🚀 Quick Start
 
-1. **Single QR Code:**
-   - Enter any text or URL in the input field
-   - Customize colors and size using the controls
-   - Upload a logo if desired
-   - Click "Download PNG" or "Download SVG"
-
-2. **Bulk Generation (CSV):**
-   - Create a CSV file with a column named `data`
-   - Each row in this column becomes a separate QR code
-   - Upload the CSV and click "Generate ZIP"
-   - Download a folder containing all QR codes as PNGs
-
-## 🛠️ Technologies Used
-
-- **QRCode.js** – Core QR generation library
-- **html2canvas** – Renders QR with logo for PNG export
-- **JSZip** – Creates ZIP files for bulk downloads
-- **FileSaver.js** – Handles file downloads
-- **Pure HTML, CSS, JavaScript** – No frameworks or backend needed
-
-## 📥 Installation
-
-Since this is a static website, you don't need to install anything. Simply:
-
-1. Download the `index.html` file
-2. Open it in any modern browser (Chrome, Firefox, Safari, Edge)
-3. That's it! All features work offline.
-
-## 🧪 CSV Format Example
-
-```csv
-data
-https://example.com
-https://google.com
-Your secret message
-WiFi:T:WPA;S:MyNetwork;P:MyPassword;;
+1. **Clone the repo:**
+   ```bash
+   git clone https://github.com/muthokaricky-alt/Advanced-QR-Code-Generator.git
