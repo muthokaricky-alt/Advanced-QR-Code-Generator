@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced QR Code Generator</title>
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+        body { background: #f0f4f8; display: flex; justify-content: center; padding: 30px; margin: 0; }
+        .container { max-width: 900px; width: 100%; background: white; padding: 35px; border-radius: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+        h1 { margin-top: 0; color: #1a202c; display: flex; align-items: center; gap: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+        
+        .control-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; font-size: 14px; color: #2d3748; margin-bottom: 5px; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 15px; }
+        input[type="color"] { width: 50px; height: 50px; border: none; padding: 0; cursor: pointer; border-radius: 10px; }
+        input[type="range"] { width: 100%; }
+        .color-row { display: flex; gap: 20px; align-items: center; }
+        
+        .preview-box { 
+            background: #f7fafc; 
+            padding: 30px; 
+            border-radius: 16px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            border: 2px dashed #cbd5e0;
+            min-height: 400px;
+            justify-content: center;
+        }
+        #qrcode-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        #qrcode { display: inline-block; }
+        
+        .btn { 
+            background: #3182ce; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 40px; 
+            font-weight: 700; 
+            font-size: 15px; 
+            cursor: pointer; 
+            transition: 0.2s;
+            margin: 6px;
+            width: 100%;
+        }
+        .btn:hover { background: #2b6cb0; transform: scale(1.02); }
+        .btn-green { background: #38a169; }
+        .btn-green:hover { background: #2f855a; }
+        .btn-purple { background: #805ad5; }
+        .btn-purple:hover { background: #6b46c1; }
+        
+        .bulk-area { 
+            margin-top: 30px; 
+            padding-top: 25px; 
+            border-top: 2px solid #e2e8f0; 
+        }
+        .file-input-wrapper { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        #bulk-status { margin-top: 10px; font-weight: 500; color: #2d3748; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⚡ Advanced QR Studio</h1>
+    <p style="color:#4a5568; margin-bottom: 25px;">Text, URLs, WiFi, Contacts — with colors, logos, and bulk export.</p>
+    
+    <div class="grid">
+        <!-- LEFT: Controls -->
+        <div>
+            <div class="control-group">
+                <label>📝 Content to Encode</label>
+                <input type="text" id="textInput" value="https://example.com" placeholder="Paste URL or any text...">
+            </div>
+            
+            <div class="control-group">
+                <label>🎨 Colors</label>
+                <div class="color-row">
+                    <div><label style="font-weight:400;">Dots:</label><input type="color" id="fgColor" value="#1a202c"></div>
+                    <div><label style="font-weight:400;">Background:</label><input type="color" id="bgColor" value="#ffffff"></div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label>📐 Size: <span id="sizeLabel">300</span>px</label>
+                <input type="range" id="sizeSlider" min="200" max="600" value="300" step="10">
+            </div>
+            
+            <div class="control-group">
+                <label>🖼️ Upload Logo (PNG with transparent bg works best)</label>
+                <input type="file" id="logoUpload" accept="image/png,image/jpeg">
+                <button class="btn btn-purple" id="removeLogoBtn" style="margin-top:8px;">✖ Remove Logo</button>
+            </div>
+            
+            <button class="btn" id="generateBtn">🔄 Generate / Refresh QR</button>
+        </div>
+        
+        <!-- RIGHT: Preview & Downloads -->
+        <div>
+            <div class="preview-box">
+                <div id="qrcode-container">
+                    <div id="qrcode"></div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; width: 100%; margin-top: 20px; flex-wrap: wrap;">
+                    <button class="btn btn-green" id="downloadPNG">⬇ Download PNG</button>
+                    <button class="btn btn-green" id="downloadSVG">⬇ Download SVG</button>
+                </div>
+                <small style="margin-top: 10px; color:#718096;">PNG includes logo & colors. SVG is vector (logo not included).</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- BULK GENERATION SECTION -->
+    <div class="bulk-area">
+        <h3>📦 Bulk Generate from CSV</h3>
+        <p style="font-size:14px; color:#4a5568;">Upload a CSV with a column named "data" (or first column). Each row becomes a QR code.</p>
+        <div class="file-input-wrapper">
+            <input type="file" id="csvUpload" accept=".csv">
+            <button class="btn btn-purple" id="bulkGenerateBtn" style="width:auto; padding: 10px 25px;">⚡ Generate ZIP</button>
+        </div>
+        <div id="bulk-status"></div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // --- DOM refs ---
+        const textInput = document.getElementById('textInput');
+        const fgColor = document.getElementById('fgColor');
+        const bgColor = document.getElementById('bgColor');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeLabel = document.getElementById('sizeLabel');
+        const logoUpload = document.getElementById('logoUpload');
+        const removeLogoBtn = document.getElementById('removeLogoBtn');
+        const generateBtn = document.getElementById('generateBtn');
+        const qrContainer = document.getElementById('qrcode');
+        const qrWrapper = document.getElementById('qrcode-container');
+        
+        let currentQR = null;
+        let logoDataURL = null; // Stores the uploaded logo as base64
+        
+        // --- Core generation function ---
+        function generateQR() {
+            const text = textInput.value.trim();
+            if (!text) { alert('Please enter some text or URL.'); return false; }
+            
+            // Clear previous QR
+            qrContainer.innerHTML = '';
+            
+            // Get size and colors
+            const size = parseInt(sizeSlider.value);
+            const fg = fgColor.value;
+            const bg = bgColor.value;
+            
+            // Generate the QR code (using high error correction for logo)
+            currentQR = new QRCode(qrContainer, {
+                text: text,
+                width: size,
+                height: size,
+                colorDark: fg,
+                colorLight: bg,
+                correctLevel: QRCode.CorrectLevel.H  // Highest error correction
+            });
+            
+            // If a logo exists, overlay it on top of the QR
+            if (logoDataURL) {
+                applyLogoOverlay();
+            }
+            
+            return true;
+        }
+        
+        // --- Apply logo on top of the QR canvas ---
+        function applyLogoOverlay() {
+            // The QRCode library creates a canvas or img inside #qrcode
+            const qrCanvas = qrContainer.querySelector('canvas');
+            if (!qrCanvas) return;
+            
+            const ctx = qrCanvas.getContext('2d');
+            const size = parseInt(sizeSlider.value);
+            
+            // Logo size: 20% of QR size (standard for readability)
+            const logoSize = size * 0.22;
+            const x = (size - logoSize) / 2;
+            const y = (size - logoSize) / 2;
+            
+            // Draw white background circle behind logo (cleaner look)
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(size/2, size/2, logoSize/2 + 5, 0, Math.PI * 2);
+            ctx.fillStyle = bgColor.value;
+            ctx.fill();
+            ctx.restore();
+            
+            // Draw the logo image
+            const img = new Image();
+            img.onload = function() {
+                // Draw circular logo
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(size/2, size/2, logoSize/2, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.clip();
+                
+                ctx.drawImage(img, x, y, logoSize, logoSize);
+                ctx.restore();
+                
+                // Add a subtle border
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(size/2, size/2, logoSize/2, 0, Math.PI * 2);
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.restore();
+            };
+            img.src = logoDataURL;
+        }
+        
+        // --- Handle logo upload ---
+        logoUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                logoDataURL = event.target.result;
+                // Regenerate QR to apply logo
+                generateQR();
+            };
+            reader.readAsDataURL(file);
+        });
+        
+        removeLogoBtn.addEventListener('click', function() {
+            logoDataURL = null;
+            logoUpload.value = '';
+            generateQR();
+        });
+        
+        // --- Regenerate on any change ---
+        generateBtn.addEventListener('click', generateQR);
+        textInput.addEventListener('input', generateQR);
+        fgColor.addEventListener('input', generateQR);
+        bgColor.addEventListener('input', generateQR);
+        sizeSlider.addEventListener('input', function() {
+            sizeLabel.textContent = this.value;
+            generateQR();
+        });
+        
+        // --- Download PNG (with logo & colors) using html2canvas ---
+        document.getElementById('downloadPNG').addEventListener('click', function() {
+            const container = document.getElementById('qrcode-container');
+            html2canvas(container, {
+                scale: 3,  // High resolution for printing
+                backgroundColor: bgColor.value,
+                allowTaint: true,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'qrcode.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                alert('Could not render PNG. Please try again.');
+                console.error(err);
+            });
+        });
+        
+        // --- Download SVG (vector, logo not included, but perfect for designers) ---
+        document.getElementById('downloadSVG').addEventListener('click', function() {
+            const qrCanvas = qrContainer.querySelector('canvas');
+            if (!qrCanvas) { alert('Generate a QR first!'); return; }
+            
+            // The QRCode library stores the drawing commands. We extract the raw QR data.
+            // Simpler approach: We'll generate a fresh SVG using the same library's output.
+            const text = textInput.value.trim();
+            if (!text) return;
+            
+            // Use QRCode library to generate SVG string
+            const size = parseInt(sizeSlider.value);
+            const fg = fgColor.value;
+            const bg = bgColor.value;
+            
+            // Create a temp div to render SVG
+            const tempDiv = document.createElement('div');
+            const tempQR = new QRCode(tempDiv, {
+                text: text,
+                width: size,
+                height: size,
+                colorDark: fg,
+                colorLight: bg,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            
+            const svgElem = tempDiv.querySelector('svg');
+            if (!svgElem) { alert('SVG generation failed.'); return; }
+            
+            const svgData = new XMLSerializer().serializeToString(svgElem);
+            const blob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.download = 'qrcode.svg';
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+        });
+        
+        // --- BULK CSV GENERATION ---
+        document.getElementById('bulkGenerateBtn').addEventListener('click', function() {
+            const fileInput = document.getElementById('csvUpload');
+            const status = document.getElementById('bulk-status');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                status.innerHTML = '⚠️ Please select a CSV file first.';
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n').filter(line => line.trim() !== '');
+                if (lines.length < 2) {
+                    status.innerHTML = '⚠️ CSV must have a header row and at least one data row.';
+                    return;
+                }
+                
+                // Parse header to find the "data" column
+                const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+                let dataIndex = header.indexOf('data');
+                if (dataIndex === -1) dataIndex = 0; // fallback to first column
+                
+                const zip = new JSZip();
+                const fg = fgColor.value;
+                const bg = bgColor.value;
+                const size = parseInt(sizeSlider.value);
+                
+                let rowCount = 0;
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const cols = lines[i].split(',').map(c => c.trim());
+                    if (cols.length <= dataIndex) continue;
+                    const data = cols[dataIndex];
+                    if (!data) continue;
+                    
+                    rowCount++;
+                    // Generate QR as canvas
+                    const tempDiv = document.createElement('div');
+                    const tempQR = new QRCode(tempDiv, {
+                        text: data,
+                        width: size,
+                        height: size,
+                        colorDark: fg,
+                        colorLight: bg,
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    
+                    const canvas = tempDiv.querySelector('canvas');
+                    if (canvas) {
+                        // Add to zip with safe filename
+                        const safeName = data.substring(0, 30).replace(/[^a-z0-9]/gi, '_') || `qr_${i}`;
+                        const dataUrl = canvas.toDataURL('image/png').split(',')[1];
+                        zip.file(`${safeName}.png`, dataUrl, { base64: true });
+                    }
+                }
+                
+                if (rowCount === 0) {
+                    status.innerHTML = '⚠️ No valid data rows found. Make sure your CSV has a "data" column.';
+                    return;
+                }
+                
+                status.innerHTML = `⏳ Generating ZIP with ${rowCount} QR codes...`;
+                
+                zip.generateAsync({ type: 'blob' }).then(function(blob) {
+                    saveAs(blob, 'qrcodes_bulk.zip');
+                    status.innerHTML = `✅ Success! Downloaded ZIP with ${rowCount} QR codes.`;
+                });
+            };
+            reader.readAsText(file);
+        });
+        
+        // --- Initial generation ---
+        generateQR();
+    })();
+</script>
+</body>
+</html>
