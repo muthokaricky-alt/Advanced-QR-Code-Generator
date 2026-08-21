@@ -1,4 +1,4 @@
-# ⚡ Advanced QR Studio Pro
+# ⚡ Advanced QR Code Generator
 
 **The ultimate QR code generator** – fully offline, with dark mode, templates, bulk generation, scanner, analytics, and more.
 
@@ -20,6 +20,9 @@
 | **⬇ Export Options** | PNG (with logo), SVG (vector), PDF (A4 print-ready) |
 | **📋 Copy to Clipboard** | Copy QR as image to paste anywhere |
 | **🌙 Dark Mode** | Toggle between light and dark themes |
+| **⌨️ Keyboard Shortcuts** | Ctrl+Enter, Ctrl+S, Ctrl+C, Ctrl+Shift+D |
+| **📤 Export History** | Download history as JSON backup |
+| **🖱️ Drag & Drop** | Drop images to set as logo |
 | **💾 100% Offline** | No server, no tracking, works locally |
 
 ## 🚀 Quick Start
@@ -27,3 +30,5 @@
 1. **Clone the repo:**
    ```bash
    git clone https://github.com/muthokaricky-alt/Advanced-QR-Code-Generator.git
+
+Future - I plan to improve heavily on the backend and UI   
