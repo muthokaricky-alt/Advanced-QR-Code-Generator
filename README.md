@@ -33,7 +33,6 @@
 
 
 Future - I plan to improve heavily on the backend and UI   
-======
 
 
 
