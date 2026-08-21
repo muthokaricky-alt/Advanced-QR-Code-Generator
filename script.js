@@ -1,47 +1,47 @@
 // ============================================================
-//  ADVANCED QR CODE GENERATOR - Full Application
+//  QR STUDIO - Full Application with Custom Corner Styles
 // ============================================================
 
 (function() {
     'use strict';
 
     // ---------- DOM REFS ----------
-    const fgColor = document.getElementById('fgColor');
-    const bgColor = document.getElementById('bgColor');
-    const sizeSlider = document.getElementById('sizeSlider');
-    const sizeLabel = document.getElementById('sizeLabel');
-    const logoUpload = document.getElementById('logoUpload');
-    const removeLogoBtn = document.getElementById('removeLogoBtn');
-    const generateBtn = document.getElementById('generateBtn');
-    const qrContainer = document.getElementById('qrcode');
-    const qrContainerWrap = document.getElementById('qrcode-container');
-    const templateSelect = document.getElementById('templateSelect');
-    const templateFields = document.getElementById('templateFields');
-    const historyGrid = document.getElementById('historyGrid');
-    const historyCount = document.getElementById('historyCount');
-    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-    const exportHistoryBtn = document.getElementById('exportHistoryBtn');
-    const darkModeToggle = document.getElementById('darkModeToggle');
-    const csvUpload = document.getElementById('csvUpload');
-    const bulkGenerateBtn = document.getElementById('bulkGenerateBtn');
-    const bulkStatus = document.getElementById('bulk-status');
-    const scanBtn = document.getElementById('scanBtn');
-    const scannerModal = document.getElementById('scannerModal');
-    const scannerCloseBtn = document.getElementById('scannerCloseBtn');
-    const scannerContainer = document.getElementById('scanner-container');
-    const scannerStatus = document.getElementById('scannerStatus');
-    const cornerSelector = document.getElementById('cornerSelector');
-    const downloadPDF = document.getElementById('downloadPDF');
-    const previewBox = document.getElementById('previewBox');
-    const dataPreviewText = document.getElementById('dataPreviewText');
-    const toastContainer = document.getElementById('toastContainer');
+    const getEl = (id) => document.getElementById(id);
 
-    // Analytics
-    const totalScansEl = document.getElementById('totalScans');
-    const uniqueCodesEl = document.getElementById('uniqueCodes');
-    const todayScansEl = document.getElementById('todayScans');
-    const lastScanEl = document.getElementById('lastScan');
-    const clearAnalyticsBtn = document.getElementById('clearAnalyticsBtn');
+    const fgColor = getEl('fgColor');
+    const bgColor = getEl('bgColor');
+    const sizeSlider = getEl('sizeSlider');
+    const sizeLabel = getEl('sizeLabel');
+    const logoUpload = getEl('logoUpload');
+    const removeLogoBtn = getEl('removeLogoBtn');
+    const generateBtn = getEl('generateBtn');
+    const qrContainer = getEl('qrcode');
+    const templateSelect = getEl('templateSelect');
+    const templateFields = getEl('templateFields');
+    const historyGrid = getEl('historyGrid');
+    const historyCount = getEl('historyCount');
+    const clearHistoryBtn = getEl('clearHistoryBtn');
+    const exportHistoryBtn = getEl('exportHistoryBtn');
+    const darkModeToggle = getEl('darkModeToggle');
+    const csvUpload = getEl('csvUpload');
+    const bulkGenerateBtn = getEl('bulkGenerateBtn');
+    const bulkStatus = getEl('bulk-status');
+    const scanBtn = getEl('scanBtn');
+    const scannerModal = getEl('scannerModal');
+    const scannerCloseBtn = getEl('scannerCloseBtn');
+    const scannerContainer = getEl('scanner-container');
+    const scannerStatus = getEl('scannerStatus');
+    const cornerSelector = getEl('cornerSelector');
+    const downloadPDF = getEl('downloadPDF');
+    const previewBox = getEl('previewBox');
+    const dataPreviewText = getEl('dataPreviewText');
+    const toastContainer = getEl('toastContainer');
+
+    const totalScansEl = getEl('totalScans');
+    const uniqueCodesEl = getEl('uniqueCodes');
+    const todayScansEl = getEl('todayScans');
+    const lastScanEl = getEl('lastScan');
+    const clearAnalyticsBtn = getEl('clearAnalyticsBtn');
 
     // ---------- STATE ----------
     let currentQR = null;
@@ -52,9 +52,11 @@
     let html5Scanner = null;
     let cornerStyle = 'square';
     let analytics = JSON.parse(localStorage.getItem('qrAnalytics') || '{"scans":[],"total":0}');
+    let isGenerating = false;
 
     // ---------- TOAST SYSTEM ----------
     function showToast(message, type = 'info', duration = 3000) {
+        if (!toastContainer) return;
         const icons = {
             success: '✅',
             error: '❌',
@@ -81,6 +83,7 @@
 
     // ---------- DARK MODE ----------
     function setDarkMode(enabled) {
+        if (!darkModeToggle) return;
         if (enabled) {
             document.documentElement.setAttribute('data-theme', 'dark');
             darkModeToggle.classList.add('active');
@@ -94,29 +97,33 @@
     const savedTheme = localStorage.getItem('darkMode');
     if (savedTheme === 'dark') setDarkMode(true);
 
-    darkModeToggle.addEventListener('click', function() {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        setDarkMode(!isDark);
-        showToast(isDark ? '🌙 Dark mode off' : '☀️ Dark mode on', 'info');
-    });
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('click', function() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            setDarkMode(!isDark);
+            showToast(isDark ? '🌙 Dark mode off' : '☀️ Dark mode on', 'info');
+        });
+    }
 
     // ---------- CORNER STYLES ----------
-    cornerSelector.addEventListener('click', function(e) {
-        const btn = e.target.closest('button');
-        if (!btn) return;
-        cornerSelector.querySelectorAll('button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        cornerStyle = btn.dataset.style;
-        generateQR();
-        showToast(`🔲 Corner style: ${btn.textContent}`, 'info');
-    });
+    if (cornerSelector) {
+        cornerSelector.addEventListener('click', function(e) {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            cornerSelector.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            cornerStyle = btn.dataset.style;
+            showToast(`🔲 Corner style: ${btn.textContent}`, 'info');
+            generateQR();
+        });
+    }
 
     // ---------- TEMPLATE SYSTEM ----------
     const templates = {
         text: {
             fields: `
                     <div class="full-width control-group">
-                        <label for="textInput">Enter any text or URL</label>
+                        <label for="textInput">Enter text or URL</label>
                         <input type="text" id="textInput" value="https://example.com" placeholder="Paste text or URL..." />
                     </div>
                 `
@@ -203,6 +210,7 @@
     };
 
     function renderTemplate(templateKey) {
+        if (!templateFields) return;
         const tpl = templates[templateKey] || templates.text;
         templateFields.innerHTML = tpl.fields;
 
@@ -230,16 +238,16 @@
                 currentText = data;
                 generateQR();
             }
-        }, 30);
+        }, 50);
     }
 
     function getTemplateData() {
-        const template = templateSelect.value;
-
-        if (template === 'text') {
-            const input = document.getElementById('textInput');
-            return input ? input.value : 'https://example.com';
+        const textInput = document.getElementById('textInput');
+        if (textInput) {
+            return textInput.value || 'https://example.com';
         }
+
+        const template = templateSelect ? templateSelect.value : 'text';
 
         if (template === 'wifi') {
             const ssid = document.getElementById('wifiSsid')?.value || 'MyWiFi';
@@ -274,7 +282,6 @@
         return 'https://example.com';
     }
 
-    // ---------- SCHEDULED GENERATION ----------
     function scheduleGenerate() {
         clearTimeout(generationTimeout);
         generationTimeout = setTimeout(() => {
@@ -283,67 +290,229 @@
         }, 400);
     }
 
-    // ---------- CORE QR GENERATION ----------
+    // ============================================================
+    //  CORE QR GENERATION WITH CUSTOM CORNER STYLES
+    // ============================================================
     function generateQR() {
-        const text = currentText || 'https://example.com';
-        if (!text) return false;
+        if (isGenerating) return;
+        isGenerating = true;
 
-        // Animation
-        qrContainerWrap.classList.remove('generating');
-        void qrContainerWrap.offsetWidth;
-        qrContainerWrap.classList.add('generating');
+        try {
+            const textInput = document.getElementById('textInput');
+            if (textInput) {
+                currentText = textInput.value || 'https://example.com';
+            }
 
-        qrContainer.innerHTML = '';
-        const size = parseInt(sizeSlider.value);
-        const fg = fgColor.value;
-        const bg = bgColor.value;
+            const text = currentText || 'https://example.com';
+            if (!text) {
+                isGenerating = false;
+                return false;
+            }
 
-        currentQR = new QRCode(qrContainer, {
-            text: text,
-            width: size,
-            height: size,
-            colorDark: fg,
-            colorLight: bg,
-            correctLevel: QRCode.CorrectLevel.H
+            console.log('Generating QR with corner style:', cornerStyle, 'for:', text);
+
+            if (qrContainer) {
+                qrContainer.innerHTML = '';
+            } else {
+                console.error('QR container not found');
+                isGenerating = false;
+                return false;
+            }
+
+            const size = parseInt(sizeSlider ? sizeSlider.value : 300) || 300;
+            const fg = fgColor ? fgColor.value : '#111111';
+            const bg = bgColor ? bgColor.value : '#ffffff';
+
+            // Generate the QR code first using the library
+            currentQR = new QRCode(qrContainer, {
+                text: text,
+                width: size,
+                height: size,
+                colorDark: fg,
+                colorLight: bg,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Wait for QR to render, then apply custom corner styles
+            setTimeout(() => {
+                applyCornerStyles();
+            }, 50);
+
+            // Update data preview
+            if (dataPreviewText) {
+                dataPreviewText.textContent = text.length > 60 ? text.substring(0, 60) + '…' : text;
+            }
+
+            // Apply logo if exists
+            if (logoDataURL) {
+                setTimeout(function() {
+                    applyLogoOverlay();
+                }, 200);
+            }
+
+            isGenerating = false;
+            return true;
+        } catch (error) {
+            console.error('QR Generation Error:', error);
+            showToast('❌ Error generating QR', 'error');
+            isGenerating = false;
+            return false;
+        }
+    }
+
+    // ============================================================
+    //  CUSTOM CORNER STYLES
+    // ============================================================
+    function applyCornerStyles() {
+        if (!qrContainer) return;
+
+        const canvas = qrContainer.querySelector('canvas');
+        if (!canvas) {
+            console.log('Canvas not ready, retrying...');
+            setTimeout(applyCornerStyles, 100);
+            return;
+        }
+
+        console.log('Applying corner style:', cornerStyle);
+
+        const ctx = canvas.getContext('2d');
+        const size = parseInt(sizeSlider ? sizeSlider.value : 300) || 300;
+        const fg = fgColor ? fgColor.value : '#111111';
+        const bg = bgColor ? bgColor.value : '#ffffff';
+
+        // Get the QR code data by scanning the canvas
+        const imageData = ctx.getImageData(0, 0, size, size);
+        const data = imageData.data;
+
+        // Find all modules (QR code pixels)
+        // We look for pixels that match the foreground color
+        const fgRgb = hexToRgb(fg);
+        const threshold = 30;
+
+        // First, identify which pixels are part of the QR code
+        const moduleSize = Math.floor(size / 25); // Approximate module size
+        const modules = [];
+
+        // Sample the canvas to find module positions
+        for (let row = 0; row < 25; row++) {
+            for (let col = 0; col < 25; col++) {
+                const x = Math.floor(col * moduleSize + moduleSize / 2);
+                const y = Math.floor(row * moduleSize + moduleSize / 2);
+                const idx = (y * size + x) * 4;
+
+                const r = data[idx];
+                const g = data[idx + 1];
+                const b = data[idx + 2];
+
+                const isFg = Math.abs(r - fgRgb.r) < threshold &&
+                    Math.abs(g - fgRgb.g) < threshold &&
+                    Math.abs(b - fgRgb.b) < threshold;
+
+                if (isFg) {
+                    modules.push({ row, col, x: col * moduleSize, y: row * moduleSize });
+                }
+            }
+        }
+
+        // Clear the canvas and redraw with custom corners
+        // We need to redraw everything from scratch
+
+        // First, fill background
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, size, size);
+
+        // Now draw each module with the selected corner style
+        const cornerRadius = cornerStyle === 'square' ? 0 :
+            cornerStyle === 'rounded' ? moduleSize * 0.3 :
+            moduleSize * 0.5; // circle
+
+        modules.forEach(module => {
+            const x = module.x;
+            const y = module.y;
+            const w = moduleSize;
+            const h = moduleSize;
+
+            ctx.fillStyle = fg;
+
+            if (cornerStyle === 'square') {
+                // Square corners
+                ctx.fillRect(x, y, w, h);
+            } else if (cornerStyle === 'rounded') {
+                // Rounded corners
+                const r = Math.min(w, h) * 0.25;
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + w - r, y);
+                ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+                ctx.lineTo(x + w, y + h - r);
+                ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                ctx.lineTo(x + r, y + h);
+                ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+                ctx.fill();
+            } else if (cornerStyle === 'circle') {
+                // Circle corners
+                const radius = Math.min(w, h) / 2;
+                const cx = x + w / 2;
+                const cy = y + h / 2;
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+            }
         });
 
-        // Apply corner style
-        applyCornerStyle();
-
-        if (logoDataURL) applyLogoOverlay();
-
-        // Update data preview
-        dataPreviewText.textContent = text.length > 60 ? text.substring(0, 60) + '…' : text;
-
-        return true;
+        console.log('Corner style applied:', cornerStyle);
     }
 
-    function applyCornerStyle() {
-        const canvas = qrContainer.querySelector('canvas');
-        if (!canvas) return;
-        // Note: Full corner style implementation requires module detection.
-        // For this demo, we keep the standard QR style.
-        // In production, use a library that supports custom module shapes.
+    // Helper: Convert hex to RGB
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : { r: 0, g: 0, b: 0 };
     }
 
+    // ============================================================
+    //  LOGO OVERLAY
+    // ============================================================
     function applyLogoOverlay() {
+        if (!qrContainer || !logoDataURL) {
+            console.log('No logo to apply');
+            return;
+        }
+
         const qrCanvas = qrContainer.querySelector('canvas');
-        if (!qrCanvas) return;
+        if (!qrCanvas) {
+            console.log('QR canvas not found, retrying...');
+            setTimeout(applyLogoOverlay, 100);
+            return;
+        }
+
+        console.log('Applying logo overlay...');
+
         const ctx = qrCanvas.getContext('2d');
-        const size = parseInt(sizeSlider.value);
+        const size = parseInt(sizeSlider ? sizeSlider.value : 300) || 300;
         const logoSize = size * 0.22;
         const x = (size - logoSize) / 2;
         const y = (size - logoSize) / 2;
 
+        // Draw white background circle behind logo
         ctx.save();
         ctx.beginPath();
-        ctx.arc(size / 2, size / 2, logoSize / 2 + 5, 0, Math.PI * 2);
-        ctx.fillStyle = bgColor.value;
+        ctx.arc(size / 2, size / 2, logoSize / 2 + 4, 0, Math.PI * 2);
+        ctx.fillStyle = bgColor ? bgColor.value : '#ffffff';
         ctx.fill();
         ctx.restore();
 
         const img = new Image();
+        img.crossOrigin = 'anonymous';
         img.onload = function() {
+            console.log('Logo image loaded, drawing...');
             ctx.save();
             ctx.beginPath();
             ctx.arc(size / 2, size / 2, logoSize / 2, 0, Math.PI * 2);
@@ -351,14 +520,24 @@
             ctx.clip();
             ctx.drawImage(img, x, y, logoSize, logoSize);
             ctx.restore();
+
             ctx.save();
             ctx.beginPath();
             ctx.arc(size / 2, size / 2, logoSize / 2, 0, Math.PI * 2);
-            ctx.strokeStyle = '#e2e8f0';
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.lineWidth = 1.5;
             ctx.stroke();
             ctx.restore();
+
+            console.log('Logo applied successfully!');
+            showToast('🖼️ Logo applied to QR!', 'success', 1500);
         };
+
+        img.onerror = function() {
+            console.error('Failed to load logo image');
+            showToast('❌ Failed to load logo', 'error');
+        };
+
         img.src = logoDataURL;
     }
 
@@ -376,11 +555,13 @@
         }).length;
         const last = scans.length > 0 ? new Date(scans[scans.length - 1].timestamp).toLocaleString() : '—';
 
-        totalScansEl.textContent = total;
-        uniqueCodesEl.textContent = unique;
-        todayScansEl.textContent = today;
-        lastScanEl.textContent = last;
-        lastScanEl.style.fontSize = scans.length > 0 ? '0.8rem' : '1rem';
+        if (totalScansEl) totalScansEl.textContent = total;
+        if (uniqueCodesEl) uniqueCodesEl.textContent = unique;
+        if (todayScansEl) todayScansEl.textContent = today;
+        if (lastScanEl) {
+            lastScanEl.textContent = last;
+            lastScanEl.style.fontSize = scans.length > 0 ? '0.8rem' : '1rem';
+        }
 
         localStorage.setItem('qrAnalytics', JSON.stringify(analytics));
     }
@@ -395,19 +576,22 @@
         updateAnalytics();
     }
 
-    clearAnalyticsBtn.addEventListener('click', function() {
-        if (confirm('Clear all analytics data?')) {
-            analytics = { scans: [], total: 0 };
-            localStorage.setItem('qrAnalytics', JSON.stringify(analytics));
-            updateAnalytics();
-            showToast('📊 Analytics cleared', 'warning');
-        }
-    });
+    if (clearAnalyticsBtn) {
+        clearAnalyticsBtn.addEventListener('click', function() {
+            if (confirm('Clear all analytics data?')) {
+                analytics = { scans: [], total: 0 };
+                localStorage.setItem('qrAnalytics', JSON.stringify(analytics));
+                updateAnalytics();
+                showToast('📊 Analytics cleared', 'warning');
+            }
+        });
+    }
 
     // ---------- HISTORY ----------
     function renderHistory() {
+        if (!historyGrid) return;
         historyGrid.innerHTML = '';
-        historyCount.textContent = history.length;
+        if (historyCount) historyCount.textContent = history.length;
 
         if (history.length === 0) {
             historyGrid.innerHTML =
@@ -465,7 +649,7 @@
                 generateQR();
                 logScan(item);
                 showToast('🔄 Loaded from history', 'info');
-                document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
+                document.querySelector('.app').scrollIntoView({ behavior: 'smooth' });
             });
 
             historyGrid.appendChild(div);
@@ -482,37 +666,44 @@
         logScan(text);
     }
 
-    clearHistoryBtn.addEventListener('click', function() {
-        if (confirm('Clear all scan history?')) {
-            history = [];
-            localStorage.setItem('qrHistory', JSON.stringify(history));
-            renderHistory();
-            showToast('🗑️ History cleared', 'warning');
-        }
-    });
+    if (clearHistoryBtn) {
+        clearHistoryBtn.addEventListener('click', function() {
+            if (confirm('Clear all scan history?')) {
+                history = [];
+                localStorage.setItem('qrHistory', JSON.stringify(history));
+                renderHistory();
+                showToast('🗑️ History cleared', 'warning');
+            }
+        });
+    }
 
-    // ---------- EXPORT HISTORY AS JSON ----------
-    exportHistoryBtn.addEventListener('click', function() {
-        if (history.length === 0) {
-            showToast('📭 No history to export', 'warning');
-            return;
-        }
-        const blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = `qr_history_${new Date().toISOString().slice(0,10)}.json`;
-        link.href = url;
-        link.click();
-        URL.revokeObjectURL(url);
-        showToast(`📤 Exported ${history.length} items`, 'success');
-    });
+    if (exportHistoryBtn) {
+        exportHistoryBtn.addEventListener('click', function() {
+            if (history.length === 0) {
+                showToast('📭 No history to export', 'warning');
+                return;
+            }
+            const blob = new Blob([JSON.stringify(history, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.download = `qr_history_${new Date().toISOString().slice(0,10)}.json`;
+            link.href = url;
+            link.click();
+            URL.revokeObjectURL(url);
+            showToast(`📤 Exported ${history.length} items`, 'success');
+        });
+    }
 
     // ---------- DOWNLOADS ----------
-    document.getElementById('downloadPNG').addEventListener('click', function() {
+    document.getElementById('downloadPNG')?.addEventListener('click', function() {
         const container = document.getElementById('qrcode-container');
+        if (!container || !qrContainer || !qrContainer.querySelector('canvas')) {
+            showToast('❌ No QR code to download', 'error');
+            return;
+        }
         html2canvas(container, {
             scale: 3,
-            backgroundColor: bgColor.value,
+            backgroundColor: bgColor ? bgColor.value : '#ffffff',
             allowTaint: true,
             useCORS: true
         }).then(canvas => {
@@ -524,12 +715,12 @@
         }).catch(() => showToast('❌ Could not render PNG', 'error'));
     });
 
-    document.getElementById('downloadSVG').addEventListener('click', function() {
+    document.getElementById('downloadSVG')?.addEventListener('click', function() {
         const text = currentText || 'https://example.com';
         if (!text) return;
-        const size = parseInt(sizeSlider.value);
-        const fg = fgColor.value;
-        const bg = bgColor.value;
+        const size = parseInt(sizeSlider ? sizeSlider.value : 300) || 300;
+        const fg = fgColor ? fgColor.value : '#111111';
+        const bg = bgColor ? bgColor.value : '#ffffff';
         const tempDiv = document.createElement('div');
         const tempQR = new QRCode(tempDiv, {
             text: text,
@@ -552,52 +743,56 @@
         showToast('⬇️ SVG downloaded', 'success');
     });
 
-    // ---------- PDF EXPORT ----------
-    downloadPDF.addEventListener('click', function() {
-        const text = currentText || 'https://example.com';
-        if (!text) return;
+    if (downloadPDF) {
+        downloadPDF.addEventListener('click', function() {
+            const text = currentText || 'https://example.com';
+            if (!text) return;
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
-        const size = parseInt(sizeSlider.value);
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('p', 'mm', 'a4');
+            const size = parseInt(sizeSlider ? sizeSlider.value : 300) || 300;
 
-        const tempDiv = document.createElement('div');
-        const tempQR = new QRCode(tempDiv, {
-            text: text,
-            width: size,
-            height: size,
-            colorDark: fgColor.value,
-            colorLight: bgColor.value,
-            correctLevel: QRCode.CorrectLevel.H
+            const tempDiv = document.createElement('div');
+            const tempQR = new QRCode(tempDiv, {
+                text: text,
+                width: size,
+                height: size,
+                colorDark: fgColor ? fgColor.value : '#111111',
+                colorLight: bgColor ? bgColor.value : '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            const canvas = tempDiv.querySelector('canvas');
+            if (!canvas) { showToast('❌ Could not generate QR for PDF', 'error'); return; }
+
+            const imgData = canvas.toDataURL('image/png');
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 20;
+            const maxDim = Math.min(pageWidth - margin * 2, pageHeight - margin * 2 - 30);
+            const dim = Math.min(maxDim, 150);
+
+            const x = (pageWidth - dim) / 2;
+            const y = (pageHeight - dim) / 2 - 10;
+
+            doc.addImage(imgData, 'PNG', x, y, dim, dim);
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text('Generated by QR Studio Pro', pageWidth / 2, pageHeight - 10, { align: 'center' });
+
+            doc.save('qrcode.pdf');
+            showToast('📄 PDF downloaded', 'success');
         });
-        const canvas = tempDiv.querySelector('canvas');
-        if (!canvas) { showToast('❌ Could not generate QR for PDF', 'error'); return; }
+    }
 
-        const imgData = canvas.toDataURL('image/png');
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 20;
-        const maxDim = Math.min(pageWidth - margin * 2, pageHeight - margin * 2 - 30);
-        const dim = Math.min(maxDim, 150);
-
-        const x = (pageWidth - dim) / 2;
-        const y = (pageHeight - dim) / 2 - 10;
-
-        doc.addImage(imgData, 'PNG', x, y, dim, dim);
-        doc.setFontSize(10);
-        doc.setTextColor(100);
-        doc.text('Generated by QR Studio Pro', pageWidth / 2, pageHeight - 10, { align: 'center' });
-
-        doc.save('qrcode.pdf');
-        showToast('📄 PDF downloaded', 'success');
-    });
-
-    // ---------- COPY TO CLIPBOARD ----------
-    document.getElementById('copyToClipboard').addEventListener('click', function() {
+    document.getElementById('copyToClipboard')?.addEventListener('click', function() {
         const container = document.getElementById('qrcode-container');
+        if (!container || !qrContainer || !qrContainer.querySelector('canvas')) {
+            showToast('❌ No QR code to copy', 'error');
+            return;
+        }
         html2canvas(container, {
             scale: 2,
-            backgroundColor: bgColor.value,
+            backgroundColor: bgColor ? bgColor.value : '#ffffff',
             allowTaint: true,
             useCORS: true
         }).then(canvas => {
@@ -605,9 +800,11 @@
                 navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
                     .then(() => {
                         const btn = document.getElementById('copyToClipboard');
-                        const orig = btn.innerHTML;
-                        btn.innerHTML = '✅ Copied!';
-                        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+                        if (btn) {
+                            const orig = btn.innerHTML;
+                            btn.innerHTML = '✅ Copied!';
+                            setTimeout(() => { btn.innerHTML = orig; }, 2000);
+                        }
                         showToast('📋 Copied to clipboard!', 'success');
                     })
                     .catch(() => showToast('❌ Copy failed', 'error'));
@@ -616,137 +813,169 @@
     });
 
     // ---------- LOGO ----------
-    logoUpload.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            logoDataURL = event.target.result;
-            generateQR();
-            addToHistory(currentText + ' [with logo]');
-            showToast('🖼️ Logo added!', 'success');
-        };
-        reader.readAsDataURL(file);
-    });
+    if (logoUpload) {
+        logoUpload.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) {
+                console.log('No file selected');
+                return;
+            }
 
-    removeLogoBtn.addEventListener('click', function() {
-        logoDataURL = null;
-        logoUpload.value = '';
-        generateQR();
-        showToast('🖼️ Logo removed', 'info');
-    });
+            if (!file.type.startsWith('image/')) {
+                showToast('❌ Please select an image file', 'error');
+                this.value = '';
+                return;
+            }
 
-    // ---------- DRAG & DROP LOGO ----------
-    previewBox.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        previewBox.classList.add('drag-over');
-    });
+            console.log('Logo file selected:', file.name);
 
-    previewBox.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        previewBox.classList.remove('drag-over');
-    });
-
-    previewBox.addEventListener('drop', function(e) {
-        e.preventDefault();
-        previewBox.classList.remove('drag-over');
-        const files = e.dataTransfer.files;
-        if (files.length > 0 && files[0].type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = function(event) {
-                logoDataURL = event.target.result;
-                generateQR();
-                addToHistory(currentText + ' [with logo]');
-                showToast('🖼️ Logo dropped!', 'success');
+                try {
+                    logoDataURL = event.target.result;
+                    console.log('Logo loaded, applying to QR...');
+                    generateQR();
+                    showToast('🖼️ Logo added!', 'success');
+                } catch (error) {
+                    console.error('Error loading logo:', error);
+                    showToast('❌ Failed to load logo', 'error');
+                }
             };
-            reader.readAsDataURL(files[0]);
-        } else {
-            showToast('❌ Please drop an image file', 'warning');
-        }
-    });
+            reader.onerror = function() {
+                showToast('❌ Failed to read file', 'error');
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (removeLogoBtn) {
+        removeLogoBtn.addEventListener('click', function() {
+            console.log('Removing logo...');
+            logoDataURL = null;
+            if (logoUpload) logoUpload.value = '';
+            generateQR();
+            showToast('🖼️ Logo removed', 'info');
+        });
+    }
+
+    // ---------- DRAG & DROP LOGO ----------
+    if (previewBox) {
+        previewBox.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            previewBox.classList.add('drag-over');
+        });
+
+        previewBox.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            previewBox.classList.remove('drag-over');
+        });
+
+        previewBox.addEventListener('drop', function(e) {
+            e.preventDefault();
+            previewBox.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    logoDataURL = event.target.result;
+                    generateQR();
+                    addToHistory(currentText + ' [with logo]');
+                    showToast('🖼️ Logo dropped!', 'success');
+                };
+                reader.readAsDataURL(files[0]);
+            } else {
+                showToast('❌ Please drop an image file', 'warning');
+            }
+        });
+    }
 
     // ---------- BULK GENERATION ----------
-    bulkGenerateBtn.addEventListener('click', function() {
-        if (!csvUpload.files || !csvUpload.files[0]) {
-            showToast('⚠️ Please select a CSV file first', 'warning');
-            return;
-        }
-        const file = csvUpload.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const content = e.target.result;
-            const lines = content.split('\n').filter(line => line.trim() !== '');
-            if (lines.length < 2) {
-                showToast('⚠️ CSV must have a header and data rows', 'warning');
+    if (bulkGenerateBtn && csvUpload && bulkStatus) {
+        bulkGenerateBtn.addEventListener('click', function() {
+            if (!csvUpload.files || !csvUpload.files[0]) {
+                showToast('⚠️ Please select a CSV file first', 'warning');
                 return;
             }
-            const header = lines[0].split(',').map(h => h.trim().toLowerCase());
-            let dataIndex = header.indexOf('data');
-            if (dataIndex === -1) dataIndex = 0;
-
-            const zip = new JSZip();
-            const fg = fgColor.value;
-            const bg = bgColor.value;
-            const size = parseInt(sizeSlider.value);
-            let rowCount = 0;
-
-            for (let i = 1; i < lines.length; i++) {
-                const cols = lines[i].split(',').map(c => c.trim());
-                if (cols.length <= dataIndex) continue;
-                const data = cols[dataIndex];
-                if (!data) continue;
-                rowCount++;
-                const tempDiv = document.createElement('div');
-                const tempQR = new QRCode(tempDiv, {
-                    text: data,
-                    width: size,
-                    height: size,
-                    colorDark: fg,
-                    colorLight: bg,
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-                const canvas = tempDiv.querySelector('canvas');
-                if (canvas) {
-                    const safeName = data.substring(0, 30).replace(/[^a-z0-9]/gi, '_') || `qr_${i}`;
-                    const dataUrl = canvas.toDataURL('image/png').split(',')[1];
-                    zip.file(`${safeName}.png`, dataUrl, { base64: true });
+            const file = csvUpload.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                const lines = content.split('\n').filter(line => line.trim() !== '');
+                if (lines.length < 2) {
+                    showToast('⚠️ CSV must have a header and data rows', 'warning');
+                    return;
                 }
-            }
+                const header = lines[0].split(',').map(h => h.trim().toLowerCase());
+                let dataIndex = header.indexOf('data');
+                if (dataIndex === -1) dataIndex = 0;
 
-            if (rowCount === 0) {
-                showToast('⚠️ No valid data rows found', 'warning');
-                return;
-            }
+                const zip = new JSZip();
+                const fg = fgColor ? fgColor.value : '#111111';
+                const bg = bgColor ? bgColor.value : '#ffffff';
+                const size = parseInt(sizeSlider ? sizeSlider.value : 300) || 300;
+                let rowCount = 0;
 
-            bulkStatus.innerHTML = `⏳ Generating ZIP with ${rowCount} QR codes…`;
-            zip.generateAsync({ type: 'blob' }).then(function(blob) {
-                saveAs(blob, 'qrcodes_bulk.zip');
-                bulkStatus.innerHTML = `✅ Success! Downloaded ZIP with ${rowCount} QR codes.`;
-                showToast(`📦 Downloaded ZIP with ${rowCount} QR codes`, 'success');
-            });
-        };
-        reader.readAsText(file);
-    });
+                for (let i = 1; i < lines.length; i++) {
+                    const cols = lines[i].split(',').map(c => c.trim());
+                    if (cols.length <= dataIndex) continue;
+                    const data = cols[dataIndex];
+                    if (!data) continue;
+                    rowCount++;
+                    const tempDiv = document.createElement('div');
+                    const tempQR = new QRCode(tempDiv, {
+                        text: data,
+                        width: size,
+                        height: size,
+                        colorDark: fg,
+                        colorLight: bg,
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    const canvas = tempDiv.querySelector('canvas');
+                    if (canvas) {
+                        const safeName = data.substring(0, 30).replace(/[^a-z0-9]/gi, '_') || `qr_${i}`;
+                        const dataUrl = canvas.toDataURL('image/png').split(',')[1];
+                        zip.file(`${safeName}.png`, dataUrl, { base64: true });
+                    }
+                }
+
+                if (rowCount === 0) {
+                    showToast('⚠️ No valid data rows found', 'warning');
+                    return;
+                }
+
+                bulkStatus.innerHTML = `⏳ Generating ZIP with ${rowCount} QR codes…`;
+                zip.generateAsync({ type: 'blob' }).then(function(blob) {
+                    saveAs(blob, 'qrcodes_bulk.zip');
+                    bulkStatus.innerHTML = `✅ Success! Downloaded ZIP with ${rowCount} QR codes.`;
+                    showToast(`📦 Downloaded ZIP with ${rowCount} QR codes`, 'success');
+                });
+            };
+            reader.readAsText(file);
+        });
+    }
 
     // ---------- QR SCANNER ----------
-    scanBtn.addEventListener('click', function() {
-        scannerModal.classList.add('active');
-        startScanner();
-    });
+    if (scanBtn && scannerModal && scannerCloseBtn && scannerContainer && scannerStatus) {
+        scanBtn.addEventListener('click', function() {
+            scannerModal.classList.add('active');
+            startScanner();
+        });
 
-    scannerCloseBtn.addEventListener('click', function() {
-        scannerModal.classList.remove('active');
-        stopScanner();
-    });
-
-    scannerModal.addEventListener('click', function(e) {
-        if (e.target === scannerModal) {
+        scannerCloseBtn.addEventListener('click', function() {
             scannerModal.classList.remove('active');
             stopScanner();
-        }
-    });
+        });
+
+        scannerModal.addEventListener('click', function(e) {
+            if (e.target === scannerModal) {
+                scannerModal.classList.remove('active');
+                stopScanner();
+            }
+        });
+    }
 
     function startScanner() {
+        if (!scannerContainer || !scannerStatus) return;
         if (html5Scanner) {
             html5Scanner.clear();
             html5Scanner = null;
@@ -776,14 +1005,16 @@
     }
 
     function onScanSuccess(decodedText, decodedResult) {
-        scannerStatus.textContent = '✅ Scanned: ' + decodedText.substring(0, 30) + (decodedText.length > 30 ?
-            '…' : '');
+        if (scannerStatus) {
+            scannerStatus.textContent = '✅ Scanned: ' + decodedText.substring(0, 30) + (decodedText.length > 30 ?
+                '…' : '');
+        }
 
         currentText = decodedText;
         const input = document.getElementById('textInput');
         if (input) input.value = decodedText;
 
-        templateSelect.value = 'text';
+        if (templateSelect) templateSelect.value = 'text';
         renderTemplate('text');
 
         generateQR();
@@ -792,7 +1023,7 @@
         showToast(`📷 Scanned: ${decodedText.substring(0, 30)}${decodedText.length > 30 ? '…' : ''}`, 'success');
 
         setTimeout(() => {
-            scannerModal.classList.remove('active');
+            if (scannerModal) scannerModal.classList.remove('active');
             stopScanner();
         }, 2000);
     }
@@ -803,7 +1034,6 @@
 
     // ---------- KEYBOARD SHORTCUTS ----------
     document.addEventListener('keydown', function(e) {
-        // Ctrl+Enter or Cmd+Enter = Generate
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
             const data = getTemplateData();
@@ -815,27 +1045,23 @@
             }
         }
 
-        // Ctrl+S = Download PNG
         if ((e.ctrlKey || e.metaKey) && e.key === 's') {
             e.preventDefault();
-            document.getElementById('downloadPNG').click();
+            document.getElementById('downloadPNG')?.click();
         }
 
-        // Ctrl+C = Copy (only if not in input field)
         if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !e.target.closest('input, select, textarea')) {
             e.preventDefault();
-            document.getElementById('copyToClipboard').click();
+            document.getElementById('copyToClipboard')?.click();
         }
 
-        // Ctrl+Shift+D = Toggle dark mode
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
             e.preventDefault();
-            darkModeToggle.click();
+            if (darkModeToggle) darkModeToggle.click();
         }
 
-        // Escape = Close scanner
         if (e.key === 'Escape') {
-            if (scannerModal.classList.contains('active')) {
+            if (scannerModal && scannerModal.classList.contains('active')) {
                 scannerModal.classList.remove('active');
                 stopScanner();
             }
@@ -861,36 +1087,46 @@
     });
 
     // ---------- EVENT BINDINGS ----------
-    templateSelect.addEventListener('change', function() {
-        renderTemplate(this.value);
-        showToast(`📋 Template: ${this.options[this.selectedIndex].text}`, 'info');
-    });
+    if (templateSelect) {
+        templateSelect.addEventListener('change', function() {
+            renderTemplate(this.value);
+            showToast(`📋 Template: ${this.options[this.selectedIndex].text}`, 'info');
+        });
+    }
 
-    generateBtn.addEventListener('click', function() {
-        const data = getTemplateData();
-        if (data) {
-            currentText = data;
+    if (generateBtn) {
+        generateBtn.addEventListener('click', function() {
+            const data = getTemplateData();
+            if (data) {
+                currentText = data;
+                generateQR();
+                addToHistory(currentText);
+                showToast('🔄 QR generated', 'success');
+            }
+        });
+    }
+
+    if (fgColor) fgColor.addEventListener('input', generateQR);
+    if (bgColor) bgColor.addEventListener('input', generateQR);
+    if (sizeSlider) {
+        sizeSlider.addEventListener('input', function() {
+            if (sizeLabel) sizeLabel.textContent = this.value;
             generateQR();
-            addToHistory(currentText);
-            showToast('🔄 QR generated', 'success');
-        }
-    });
-
-    fgColor.addEventListener('input', generateQR);
-    bgColor.addEventListener('input', generateQR);
-    sizeSlider.addEventListener('input', function() {
-        sizeLabel.textContent = this.value;
-        generateQR();
-    });
+        });
+    }
 
     // ---------- INIT ----------
     renderTemplate('text');
     renderHistory();
     updateAnalytics();
 
-    // Show welcome toast
-    setTimeout(() => {
-        showToast('🚀 Welcome to QR Studio Pro!', 'info', 2500);
-    }, 500);
+    setTimeout(function() {
+        const input = document.getElementById('textInput');
+        if (input) {
+            currentText = input.value || 'https://example.com';
+            generateQR();
+            showToast('🚀 QR Studio ready!', 'info', 2000);
+        }
+    }, 300);
 
 })();

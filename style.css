@@ -3,7 +3,6 @@
    ============================================================ */
 
 :root {
-    /* Neutrals */
     --bg: #f8f8f8;
     --bg-surface: #ffffff;
     --bg-input: #f0f0f0;
@@ -18,7 +17,6 @@
     --border: #e5e5e5;
     --border-focus: #1a1a1a;
 
-    /* Brand – restrained */
     --primary: #1a1a1a;
     --primary-hover: #333333;
     --primary-light: #f0f0f0;
@@ -28,26 +26,12 @@
     --red: #b33a3a;
     --red-hover: #8a2c2c;
 
-    /* Spacing */
-    --space-xs: 4px;
-    --space-sm: 8px;
-    --space-md: 16px;
-    --space-lg: 24px;
-    --space-xl: 32px;
-    --space-2xl: 48px;
-
-    /* Radius */
     --radius-sm: 4px;
     --radius-md: 6px;
     --radius-lg: 8px;
-
-    /* Transitions */
     --ease: 0.2s ease;
 }
 
-/* ============================================================
-   DARK THEME
-   ============================================================ */
 [data-theme="dark"] {
     --bg: #0d0d0d;
     --bg-surface: #141414;
@@ -86,7 +70,6 @@
 
 html {
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -99,9 +82,6 @@ body {
     transition: background var(--ease), color var(--ease);
 }
 
-/* ============================================================
-   APP CONTAINER
-   ============================================================ */
 .app {
     max-width: 1100px;
     margin: 0 auto;
@@ -135,15 +115,12 @@ body {
 .logo-mark {
     font-size: 1.2rem;
     color: var(--text);
-    font-weight: 400;
-    letter-spacing: -0.02em;
 }
 
 .logo-text {
     font-size: 1rem;
     font-weight: 500;
     color: var(--text);
-    letter-spacing: -0.01em;
 }
 
 .topbar-right {
@@ -205,7 +182,7 @@ body {
 .controls {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
 }
 
 .control-group {
@@ -265,7 +242,7 @@ body {
 }
 
 /* ============================================================
-   TEMPLATE FIELDS
+   TEMPLATE FIELDS - FIXED SPACING
    ============================================================ */
 .template-fields {
     display: grid;
@@ -275,7 +252,7 @@ body {
     background: var(--bg-input);
     border-radius: var(--radius-sm);
     transition: background var(--ease);
-    margin-top: 0;
+    margin: 0;
 }
 
 .template-fields .full-width {
@@ -516,7 +493,6 @@ body {
     color: var(--text-secondary);
     cursor: pointer;
     transition: all var(--ease);
-    text-decoration: none;
     line-height: 1.4;
 }
 
@@ -679,7 +655,6 @@ body {
     font-size: 1.2rem;
     font-weight: 500;
     color: var(--text);
-    letter-spacing: -0.01em;
 }
 
 .analytics-label {
@@ -1063,18 +1038,4 @@ body {
     .bulk-row input[type="file"] {
         min-width: 100%;
     }
-}
-
-/* ============================================================
-   UTILITY
-   ============================================================ */
-.sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    border: 0;
 }

@@ -60,9 +60,12 @@
                     </select>
                 </div>
 
-                <!-- Dynamic Fields -->
+                <!-- Template Fields -->
                 <div id="templateFields" class="template-fields">
-                    <!-- Filled by JavaScript on load -->
+                    <div class="full-width control-group">
+                        <label for="textInput">Enter text or URL</label>
+                        <input type="text" id="textInput" value="https://example.com" placeholder="Paste text or URL..." />
+                    </div>
                 </div>
 
                 <!-- Appearance -->
@@ -152,6 +155,10 @@
                 <div class="analytics-item">
                     <span class="analytics-number" id="todayScans">0</span>
                     <span class="analytics-label">Today</span>
+                </div>
+                <div class="analytics-divider"></div>
+                <div class="analytics-item">
+                    <button class="btn btn-ghost btn-xs" id="clearAnalyticsBtn">Clear</button>
                 </div>
             </div>
 
