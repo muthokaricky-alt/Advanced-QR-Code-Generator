@@ -31,11 +31,8 @@
    ```bash
    git clone https://github.com/muthokaricky-alt/Advanced-QR-Code-Generator.git
 
-<<<<<<< HEAD
+
 Future - I plan to improve heavily on the backend and UI   
-=======
-**Future**
-PLanning to make improvements and backend later
 
 
 
