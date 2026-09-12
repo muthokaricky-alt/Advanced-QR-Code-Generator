@@ -1,6 +1,7 @@
 // ============================================================
 //  QR STUDIO - Full Application with Custom Corner Styles
 // ============================================================
+//whole app logic
 
 (function() {
     'use strict';
