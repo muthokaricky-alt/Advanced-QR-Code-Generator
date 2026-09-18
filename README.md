@@ -32,7 +32,11 @@
    git clone https://github.com/muthokaricky-alt/Advanced-QR-Code-Generator.git
 
 
-Future - I plan to improve heavily on the backend and UI and accessibility   
+**Future**
+- I plan to improve heavily on the backend and UI and accessibility
+- Also refine the UI later too
+  
+
 
 
 
