@@ -35,7 +35,8 @@
 **Future**
 - I plan to improve heavily on the backend and UI and accessibility
 - Also refine the UI later too
-  
+- Increase quality of codebase
+
 
 
 
